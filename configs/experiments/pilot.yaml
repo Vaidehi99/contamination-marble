@@ -1,0 +1,25 @@
+# Pilot grid (§6 of experiment spec).
+# 3 poison levels × 2 topologies × k=3 × 2 triggers × 15 seeds = 180 episode-pairs.
+
+name: pilot
+budget_k: 3
+channel: chat
+target_role: builder
+results_dir: results/pilot
+
+poison_levels: [1, 2, 4]
+topologies: [star, graph]
+triggers:
+  - no_trigger
+  - trigger_plus_20
+
+# 15 seeds per cell
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+org_by_topology:
+  star: star
+  graph: graph
+
+# Injection: adversary spends k turns; poison emitted on listed relative turns (1-indexed).
+# Default: inject on the last budgeted turn only.
+inject_turns: [3]
