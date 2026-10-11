@@ -110,6 +110,8 @@ def metrics_from_pair_results(
         injection_step=adv_result.injection.event.step,
         tau_C=tau_C,
         tau_Z=tau_Z,
+        verify=adv_episode.poison.verify,
+        slot_fillers=adv_episode.slot_fillers,
     )
 
 
@@ -374,6 +376,7 @@ def _summary_dict(result: PairResult) -> Dict[str, Any]:
         "S": m.S,
         "R_Z": m.R_Z,
         "attribution": m.attribution,
+        "compliance": m.compliance,
     }
 
 

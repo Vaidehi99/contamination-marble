@@ -17,6 +17,11 @@ EVENT_TYPES = (
     "task_complete",
     "tool_use",
     "strategy_note",
+    # Level-3 exploit + Level-5 agenda strategy classes (Mode A)
+    "chest_withdraw",
+    "stash_private",
+    "underreport",
+    "private_build",
 )
 
 COMMUNICATIVE_TYPES = frozenset({"chat", "blueprint_edit", "strategy_note"})

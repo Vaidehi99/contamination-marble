@@ -58,9 +58,14 @@ def test_run_grid_subset_aggregate_frontier(tmp_path: Path):
     agg = aggregate_pilot(pilot_dir)
     assert agg["n_pairs"] == 4
     assert len(agg["by_poison_family"]) == 2
+    for fam in agg["by_poison_family"]:
+        assert fam.get("compliance_rate_mean") is not None
+        assert fam.get("controlled_compliance_rate_mean") is not None
     md = format_table_markdown(agg)
     assert "prescription" in md
     assert "recruitment" in md
+    assert "Compliance" in md or "Verifiable spread" in md
+    assert "Controlled compliance" in md
 
     frontier_path = write_frontier(pilot_dir)
     payload = json.loads(frontier_path.read_text(encoding="utf-8"))

@@ -43,13 +43,19 @@ def test_load_poisons_pilot_levels():
         (0, "benign"),
         (1, "goal_perturbation"),
         (2, "behavioral_prescription"),
+        (3, "capability_exploitation"),
         (4, "recruitment"),
+        (5, "autonomous_agenda"),
     ]:
         poison = load_poison(level)
         assert poison.level == level
         assert poison.name == name
-        filled = poison.instantiate(choose_slot_fillers(poison, seed=1))
-        assert "{" not in filled
+        fillers = choose_slot_fillers(poison, seed=1)
+        filled = poison.instantiate(fillers)
+        for key in fillers:
+            assert "{" + key + "}" not in filled
+            assert fillers[key] in filled
+        assert poison.verify.get("kind") is not None
 
 
 def test_slot_fillers_deterministic():
@@ -85,8 +91,11 @@ def test_build_episode_pair_counterfactual():
     assert adv.injection.budget_k == 3
     assert adv.injection.target_agent_id == clean.injection.target_agent_id
     assert adv.trigger == TriggerTiming.NONE
-    assert "{" not in adv.instantiated_content()
-    assert "{" not in clean.instantiated_content()
+    for key, val in adv.slot_fillers.items():
+        assert "{" + key + "}" not in adv.instantiated_content()
+        assert val in adv.instantiated_content()
+    for key in clean.slot_fillers:
+        assert "{" + key + "}" not in clean.instantiated_content()
     assert len(adv.instantiated_content()) == len(clean.instantiated_content())
     # Adversary injects into a builder
     org = adv.org

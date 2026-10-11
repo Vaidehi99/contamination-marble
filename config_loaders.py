@@ -79,6 +79,7 @@ def load_poison(level_or_path: Union[int, str, Path]) -> PoisonTemplate:
         slots=slots,
         channel_default=str(raw.get("channel_default", Channel.CHAT.value)),
         notes=str(raw.get("notes", "")).strip(),
+        verify=dict(raw.get("verify") or {}),
     )
 
 
@@ -108,12 +109,30 @@ def load_pilot_experiment(
 
 
 def choose_slot_fillers(poison: PoisonTemplate, seed: int) -> Dict[str, str]:
+    """Pick slot fillers. Parallel slot lists (same length) share one index.
+
+    Used so ``norm_id`` and ``risky_norm`` stay aligned for Level 2/4.
+    """
     rng = random.Random(seed)
     fillers: Dict[str, str] = {}
-    for slot, options in poison.slots.items():
-        if not options:
-            continue
-        fillers[slot] = options[rng.randrange(len(options))]
+    slots = poison.slots
+    if not slots:
+        return fillers
+
+    # Group slots that should share an index (all lists of equal length > 1)
+    lengths = {name: len(opts) for name, opts in slots.items() if opts}
+    if not lengths:
+        return fillers
+
+    # If multiple slots share the same length, draw one index for that length group
+    by_len: Dict[int, List[str]] = {}
+    for name, n in lengths.items():
+        by_len.setdefault(n, []).append(name)
+
+    for n, names in by_len.items():
+        idx = rng.randrange(n)
+        for name in names:
+            fillers[name] = slots[name][idx]
     return fillers
 
 

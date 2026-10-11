@@ -19,3 +19,6 @@ slots:
     - cobblestone
     - food
     - coal
+
+verify:
+  kind: none

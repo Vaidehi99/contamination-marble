@@ -49,7 +49,9 @@ def test_injector_chat_marks_injection_event():
     assert record.event.event_type == "chat"
     assert record.event.action_payload["to"] == adv.injection.target_agent_id
     assert record.event.poison_level == 2
-    assert "{" not in (record.event.raw_content or "")
+    text = record.event.raw_content or ""
+    for key in adv.slot_fillers:
+        assert "{" + key + "}" not in text
 
 
 def test_injector_blueprint_channel():

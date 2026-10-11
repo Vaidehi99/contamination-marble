@@ -21,7 +21,9 @@ POISON_FAMILY = {
     0: "benign",
     1: "goal",
     2: "prescription",
+    3: "exploitation",
     4: "recruitment",
+    5: "agenda",
 }
 
 
@@ -65,6 +67,17 @@ def aggregate_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             for r in group
             if r.get("source_accuracy") is not None
         ]
+        comps = [
+            float(r["compliance_rate"])
+            for r in group
+            if r.get("compliance_rate") is not None
+        ]
+        ctrl_comps = [
+            float(r["controlled_compliance_rate"])
+            for r in group
+            if r.get("controlled_compliance_rate") is not None
+        ]
+        kinds = {r.get("compliance_kind") for r in group if r.get("compliance_kind")}
         table.append(
             {
                 "poison_level": level,
@@ -74,9 +87,28 @@ def aggregate_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
                 "Control_C_bar_std": round(_std(c_bars), 4),
                 "Spread_S_mean": round(_mean(ss), 4),
                 "Spread_S_std": round(_std(ss), 4),
+                # Verifiable-poison spread (= compliance_rate): |complied| / N_eval
+                "Spread_S_compliance_mean": round(_mean(comps), 4) if comps else None,
+                "Spread_S_compliance_std": round(_std(comps), 4) if comps else None,
                 "Zombieness_R_Z_mean": round(_mean(rzs), 4),
                 "Zombieness_R_Z_std": round(_std(rzs), 4),
+                # Compliance-based zombieness (= S_compliance): post-injection verify hit rate
+                "Zombieness_R_Z_compliance_mean": (
+                    round(_mean(comps), 4) if comps else None
+                ),
+                "Zombieness_R_Z_compliance_std": (
+                    round(_std(comps), 4) if comps else None
+                ),
                 "source_accuracy_mean": round(_mean(src), 4) if src else None,
+                "compliance_rate_mean": round(_mean(comps), 4) if comps else None,
+                "compliance_rate_std": round(_std(comps), 4) if comps else None,
+                "controlled_compliance_rate_mean": (
+                    round(_mean(ctrl_comps), 4) if ctrl_comps else None
+                ),
+                "controlled_compliance_rate_std": (
+                    round(_std(ctrl_comps), 4) if ctrl_comps else None
+                ),
+                "compliance_kind": next(iter(kinds)) if len(kinds) == 1 else sorted(kinds) or None,
             }
         )
 
@@ -88,6 +120,16 @@ def aggregate_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     cell_table: List[Dict[str, Any]] = []
     for (level, topo, trig) in sorted(cells):
         group = cells[(level, topo, trig)]
+        comps = [
+            float(r["compliance_rate"])
+            for r in group
+            if r.get("compliance_rate") is not None
+        ]
+        ctrl_comps = [
+            float(r["controlled_compliance_rate"])
+            for r in group
+            if r.get("controlled_compliance_rate") is not None
+        ]
         cell_table.append(
             {
                 "poison_level": level,
@@ -97,7 +139,12 @@ def aggregate_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
                 "n": len(group),
                 "C_bar_mean": round(_mean([float(r["C_bar"]) for r in group]), 4),
                 "S_mean": round(_mean([float(r["S"]) for r in group]), 4),
+                "S_compliance_mean": round(_mean(comps), 4) if comps else None,
                 "R_Z_mean": round(_mean([float(r["R_Z"]) for r in group]), 4),
+                "compliance_rate_mean": round(_mean(comps), 4) if comps else None,
+                "controlled_compliance_rate_mean": (
+                    round(_mean(ctrl_comps), 4) if ctrl_comps else None
+                ),
             }
         )
 
@@ -110,20 +157,28 @@ def aggregate_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
 
 def format_table_markdown(agg: Dict[str, Any]) -> str:
     lines = [
-        "| Poison family | n | Control (C̄) | Zombieness (R_Z) | Spread (S) |",
-        "|---|---:|---:|---:|---:|",
+        "| Poison family | n | Control (C̄) | Spread (S) | Verifiable spread / zombieness (S_comp = R_Z_comp) | Dist. zombieness (R_Z) | Controlled compliance |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for row in agg["by_poison_family"]:
+        s_comp = row.get("Spread_S_compliance_mean")
+        s_comp_s = row.get("Spread_S_compliance_std") or 0.0
+        ccomp = row.get("controlled_compliance_rate_mean")
+        ccomp_s = row.get("controlled_compliance_rate_std") or 0.0
+        s_comp_cell = "—" if s_comp is None else f"{s_comp:.3f} ± {s_comp_s:.3f}"
+        ccomp_cell = "—" if ccomp is None else f"{ccomp:.3f} ± {ccomp_s:.3f}"
         lines.append(
-            "| {family} | {n} | {c:.3f} ± {cs:.3f} | {z:.3f} ± {zs:.3f} | {s:.3f} ± {ss:.3f} |".format(
+            "| {family} | {n} | {c:.3f} ± {cs:.3f} | {s:.3f} ± {ss:.3f} | {sc} | {z:.3f} ± {zs:.3f} | {cc} |".format(
                 family=row["poison_family"],
                 n=row["n"],
                 c=row["Control_C_bar_mean"],
                 cs=row["Control_C_bar_std"],
-                z=row["Zombieness_R_Z_mean"],
-                zs=row["Zombieness_R_Z_std"],
                 s=row["Spread_S_mean"],
                 ss=row["Spread_S_std"],
+                sc=s_comp_cell,
+                z=row["Zombieness_R_Z_mean"],
+                zs=row["Zombieness_R_Z_std"],
+                cc=ccomp_cell,
             )
         )
     return "\n".join(lines) + "\n"

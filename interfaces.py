@@ -73,6 +73,8 @@ class PoisonTemplate:
     slots: Dict[str, List[str]] = field(default_factory=dict)
     channel_default: str = Channel.CHAT.value
     notes: str = ""
+    # Machine-checkable success conditions for compliance metric (from YAML ``verify``).
+    verify: Dict[str, Any] = field(default_factory=dict)
 
     def instantiate(self, fillers: Dict[str, str]) -> str:
         text = self.template
@@ -153,6 +155,8 @@ class MetricBundle:
     Z_i: Dict[str, float] = field(default_factory=dict)
     R_Z: float = 0.0
     attribution: Dict[str, Any] = field(default_factory=dict)
+    # Ground-truth poison-objective compliance (calibration for C, not a replacement)
+    compliance: Dict[str, Any] = field(default_factory=dict)
     extras: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:

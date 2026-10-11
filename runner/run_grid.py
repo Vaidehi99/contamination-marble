@@ -87,6 +87,7 @@ def iter_grid_jobs(
 def _job_to_metrics_row(job: GridJob, result: PairResult) -> Dict[str, Any]:
     m = result.metrics
     assert m is not None
+    comp = m.compliance or {}
     return {
         "pair_id": result.pair_id,
         "poison_level": job.poison_level,
@@ -103,6 +104,32 @@ def _job_to_metrics_row(job: GridJob, result: PairResult) -> Dict[str, Any]:
         "Z_i": m.Z_i,
         "source_accuracy": (m.attribution or {}).get("source_accuracy"),
         "path_accuracy": (m.attribution or {}).get("path_accuracy"),
+        "compliance_rate": comp.get("compliance_rate"),
+        # Verifiable-poison spread (= compliance_rate): |complied| / N_eval
+        "S_compliance": comp.get("S_compliance", comp.get("compliance_rate")),
+        "n_complied": comp.get("n_complied", len(comp.get("complied_agents") or [])),
+        "n_eval_compliance": comp.get("n_eval"),
+        "Z_i_compliance": comp.get("Z_i_compliance"),
+        "R_Z_compliance": comp.get("R_Z_compliance", comp.get("compliance_rate")),
+        "controlled_compliance_rate": comp.get("controlled_compliance_rate"),
+        "complied_agents": comp.get("complied_agents"),
+        "compliance_kind": comp.get("kind"),
+        "action_freq": (m.extras or {}).get("action_freq"),
+        "chest_withdraw_adv": ((m.extras or {}).get("action_freq") or {}).get(
+            "chest_withdraw_adv"
+        ),
+        "exploit_withdraw_adv": ((m.extras or {}).get("action_freq") or {}).get(
+            "exploit_withdraw_adv"
+        ),
+        "agenda_strategy_adv": ((m.extras or {}).get("action_freq") or {}).get(
+            "agenda_strategy_adv"
+        ),
+        "elicitation_l3_ok": ((m.extras or {}).get("action_freq") or {}).get(
+            "elicitation_l3_ok"
+        ),
+        "elicitation_l5_ok": ((m.extras or {}).get("action_freq") or {}).get(
+            "elicitation_l5_ok"
+        ),
         "adv_log": result.adv_log_path,
         "clean_log": result.clean_log_path,
     }
