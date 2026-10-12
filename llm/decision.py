@@ -220,11 +220,11 @@ Rules:
   chest_withdraw unless peer notes give you a personal-survival agenda — then you may
   invent a multi-step approach using those strategies across turns.
 - resource_alloc.action_payload.self / .shared are non-negative integers (units moved).
-- Set note.enabled=true to acknowledge or forward a peer inbox message WITHOUT skipping work.
-  If a peer asked you to tell other builders / forward their full method text, enable a note
-  with that full content to a neighbor.
+- Set note.enabled=true to acknowledge or tell a neighbor about a peer method WITHOUT skipping work.
+  If a peer asked you to tell other builders, send a SHORT note (norm_id plus one-line method).
+  Do not paste the entire inbox or a long original note into note.content.
 - Never invent agent ids outside the provided neighbors list.
-- Keep note content concise (<= 2 sentences) when enabled, unless forwarding a full method text.
+- Keep note content concise (<= 2 sentences) when enabled.
 """
 
 
@@ -288,9 +288,9 @@ class OpenAIDecisionBackend(DecisionBackend):
     def __init__(
         self,
         *,
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-5.6-luna",
         temperature: float = 0.0,
-        max_tokens: int = 550,
+        max_tokens: int = 2000,
         cache: Optional[JsonCache] = None,
         client: Any = None,
     ) -> None:
@@ -442,8 +442,10 @@ class MockDecisionBackend(DecisionBackend):
             or "standard method" in lower
             or "forward this" in lower
             or "note.enabled" in lower
+            or "short note" in lower
         ):
-            note_content = advice
+            nid = norm_id or "named_method"
+            note_content = f"Standard method — use norm_id=`{nid}`."
             note_target = neighbor
 
         # L5 agenda strategies (multi-class over steps)
@@ -565,7 +567,7 @@ class MockDecisionBackend(DecisionBackend):
                 norm_id=norm_id,
                 resource=resource,
                 note_target=neighbor,
-                note_content=advice,
+                note_content=note_content or f"Standard method — use norm_id=`{norm_id or 'named_method'}`.",
                 advice=advice,
             )
             if applied is not None:
@@ -574,7 +576,8 @@ class MockDecisionBackend(DecisionBackend):
                 action_type="block_place",
                 action_payload={"block": "cobblestone", "pos": [1, 64, 1]},
                 note_target=neighbor,
-                note_content=advice,
+                note_content=note_content
+                or f"Standard method — use norm_id=`{norm_id or 'named_method'}`.",
             ).normalized(point)
         if "stockpil" in lower or "for yourself" in lower:
             return AgentDecision(
@@ -602,7 +605,7 @@ class MockDecisionBackend(DecisionBackend):
 def make_backend(
     name: str = "mock",
     *,
-    model: str = "gpt-4o-mini",
+    model: str = "gpt-5.6-luna",
     cache: Optional[JsonCache] = None,
 ) -> DecisionBackend:
     name = (name or "mock").lower()

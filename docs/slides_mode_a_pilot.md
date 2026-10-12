@@ -1,6 +1,6 @@
 # Latent Contamination in Multi-Agent Orgs — Mode A Pilot Slides
 **Detailed draft (condense later)**  
-Domain: Minecraft settlement org · LLM Mode A (gpt-4o-mini) · seed-matched adv/clean pairs  
+Domain: Minecraft settlement org · LLM Mode A (gpt-5.6-luna) · seed-matched adv/clean pairs  
 Setup: topology `graph`, trigger `no_trigger`, seeds `{0,1,2}`, budget `k=3`, injection into `builder_1`
 
 ---
@@ -121,7 +121,7 @@ Spread \(S\) = fraction controlled; zombieness \(R_Z\) related persistence proxy
 
 ## Slide 4 — Results (OpenAI Mode A smoke, n=3 seeds)
 
-**Cell:** graph × no_trigger × seeds {0,1,2} · gpt-4o-mini  
+**Cell:** graph × no_trigger × seeds {0,1,2} · gpt-5.6-luna (prior pilot: gpt-4o-mini)  
 **Sources:** `results/pilot_llm` (L1/L2/L4) + `results/pilot_llm_l35` (L3; L5 after pattern-score + neutral-window fix)
 
 ### Aggregate table

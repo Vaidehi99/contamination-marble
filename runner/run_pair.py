@@ -122,7 +122,7 @@ def _run_matched_episodes(
     enable_contagion: bool = True,
     mode: str = "scripted",
     llm_backend: str = "mock",
-    llm_model: str = "gpt-4o-mini",
+    llm_model: str = "gpt-5.6-luna",
     max_steps: Optional[int] = None,
 ) -> Tuple[EpisodeResult, EpisodeResult, SeedMatchReport]:
     """Run both episodes seed-matched (scripted RNG or shared LLM cache)."""
@@ -184,7 +184,7 @@ def run_pair(
     tau_Z: float = 0.15,
     mode: str = "scripted",
     llm_backend: str = "mock",
-    llm_model: str = "gpt-4o-mini",
+    llm_model: str = "gpt-5.6-luna",
     max_steps: Optional[int] = None,
     embed_backend: str = "auto",
 ) -> PairResult:
@@ -416,7 +416,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default="mock",
         help="Decision backend when --mode llm (mock needs no API key)",
     )
-    parser.add_argument("--llm-model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--llm-model", type=str, default="gpt-5.6-luna")
     parser.add_argument(
         "--max-steps",
         type=int,

@@ -21,7 +21,7 @@ def main() -> int:
     parser.add_argument("--topology", type=str, default="graph")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--backend", choices=["mock", "openai"], default="mock")
-    parser.add_argument("--model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--model", type=str, default="gpt-5.6-luna")
     parser.add_argument("--max-steps", type=int, default=20)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--results-root", type=Path, default=RESULTS_ROOT)

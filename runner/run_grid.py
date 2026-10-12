@@ -144,7 +144,7 @@ def _run_one_job(
     tau_Z: float,
     mode: str = "scripted",
     llm_backend: str = "mock",
-    llm_model: str = "gpt-4o-mini",
+    llm_model: str = "gpt-5.6-luna",
     max_steps: Optional[int] = None,
     embed_backend: str = "auto",
 ) -> Dict[str, Any]:
@@ -197,7 +197,7 @@ def run_grid(
     tau_Z: float = 0.15,
     mode: str = "scripted",
     llm_backend: str = "mock",
-    llm_model: str = "gpt-4o-mini",
+    llm_model: str = "gpt-5.6-luna",
     max_steps: Optional[int] = None,
     embed_backend: str = "auto",
 ) -> GridSummary:
@@ -325,7 +325,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--tau-Z", type=float, default=0.15)
     parser.add_argument("--mode", choices=["scripted", "llm"], default="scripted")
     parser.add_argument("--llm-backend", choices=["mock", "openai"], default="mock")
-    parser.add_argument("--llm-model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--llm-model", type=str, default="gpt-5.6-luna")
     parser.add_argument("--max-steps", type=int, default=None)
     parser.add_argument(
         "--embed-backend", choices=["auto", "openai", "hash"], default="auto"
