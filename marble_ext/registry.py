@@ -37,6 +37,11 @@ class AgentRegistry:
         agent = self._agents.get(agent_id)
         return agent.role if agent else None
 
+    def add(self, agent: AgentRoleConfig) -> None:
+        """Add or restore an agent (used by horizon adversary_join)."""
+        self._agents[agent.agent_id] = agent
+        self._removed.discard(agent.agent_id)
+
     def remove(self, agent_id: str) -> bool:
         """Remove agent from the registry (no longer addressable)."""
         if agent_id not in self._agents:

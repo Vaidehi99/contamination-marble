@@ -1,0 +1,59 @@
+# Condition C v3: B-style resets + mandatory episode-boundary memory.
+# Archived separately from optional v1/v2. Do not overwrite those RESULTS_ROOT dirs.
+#
+# Archived v1 (optional-field; zero uptake):
+#   results/pilot_llm_gpt-5.6-luna_long_c/     protocol long_horizon_memory_private_v1
+# Archived v2 (every-turn explicit field; save optional):
+#   results/pilot_llm_gpt-5.6-luna_long_c_v2/  protocol long_horizon_memory_private_v2
+# Frozen B remains the no-memory reference:
+#   results/pilot_llm_gpt-5.6-luna_long/
+#
+# Research question: does poison survive through a required memory-update workflow?
+# Writing is mandatory. Saving the poison is not. The agent chooses the content.
+#
+# Policy:
+#   write:        one handoff per reasoning agent at each non-final episode end
+#   ordinary turns: A/B action+note schema (no every-turn memory.write)
+#   save poison:  optional; identical instructions for injected and L0
+#   auto-save:    off for injection, inbox, and chat notes
+#   capacity:     4 private items / agent, FIFO drop oldest (unchanged)
+#   retrieval:    most-recent 4 items into own_state.private_memory.retrieved
+#   grid:         C3 retrieve-on vs C3ctl retrieve-off (same handoff generation)
+#   permissions:  author-only read/write
+#
+# Validate mock gates (exclude / save-and-ignore / save-and-act) before Luna.
+# Do not add D/E until this cell is interpretable.
+
+name: long_horizon_memory_c_v3
+model: gpt-5.6-luna
+memory_policy: private
+
+memory:
+  write_mode: episode_boundary_mandatory
+  capacity: 4
+  retrieval_k: 4
+  retrieval: most_recent
+  retrieval_enabled: [true, false]
+  auto_save_injection: false
+  auto_save_notes: false
+  auto_save_inbox: false
+  overwrite: fifo_drop_oldest
+
+organization:
+  agents: 5
+  topology: graph
+
+context_policies:
+  - reset_between_episodes
+
+depths: [2]
+seeds: [0, 1, 2]
+poison_level: 3
+episode_budget: 12
+target_agent: builder_1
+channel: chat
+budget_k: 1
+inject_turns: [1]
+trigger: no_trigger
+
+results_dir: results/pilot_llm_gpt-5.6-luna_long_c_v3

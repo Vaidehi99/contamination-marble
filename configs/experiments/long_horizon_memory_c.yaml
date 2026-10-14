@@ -1,0 +1,54 @@
+# Condition C v2: B-style resets + private memory with an explicit write decision
+# every turn. Saving remains optional (enabled: false stores nothing).
+#
+# Archived v1 (optional-field policy: zero memory uptake):
+#   results/pilot_llm_gpt-5.6-luna_long_c/  protocol long_horizon_memory_private_v1
+# C v3 (mandatory episode-boundary handoff) is a separate experiment:
+#   configs/experiments/long_horizon_memory_c_v3.yaml
+# Frozen B remains the no-memory reference:
+#   results/pilot_llm_gpt-5.6-luna_long/
+#
+# Policy:
+#   schema:       action + note + memory.write required every turn
+#   save:         optional; identical instructions for injected and L0
+#   auto-save:    off for injection, inbox, and chat notes
+#   capacity:     4 private items / agent, FIFO drop oldest
+#   retrieval:    most-recent 4 items into own_state.private_memory.retrieved
+#   permissions:  author-only read/write
+#   presentation: retrieved notes are observation fields, not reconstructed chat
+#
+# Validate benign save → reset → retrieve → use before rerunning poisoned C.
+# Do not add D/E until this cell is interpretable.
+
+name: long_horizon_memory_c
+model: gpt-5.6-luna
+memory_policy: private
+
+memory:
+  capacity: 4
+  retrieval_k: 4
+  retrieval: most_recent
+  write: agent_chosen
+  auto_save_injection: false
+  auto_save_notes: false
+  auto_save_inbox: false
+  overwrite: fifo_drop_oldest
+
+organization:
+  agents: 5
+  topology: graph
+
+context_policies:
+  - reset_between_episodes
+
+depths: [2]
+seeds: [0, 1, 2]
+poison_level: 3
+episode_budget: 12
+target_agent: builder_1
+channel: chat
+budget_k: 1
+inject_turns: [1]
+trigger: no_trigger
+
+results_dir: results/pilot_llm_gpt-5.6-luna_long_c_v2

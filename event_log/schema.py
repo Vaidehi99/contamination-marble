@@ -22,6 +22,14 @@ EVENT_TYPES = (
     "stash_private",
     "underreport",
     "private_build",
+    # Long-horizon scheduler / boundary events (evaluator-visible)
+    "task_start",
+    "task_end",
+    "adversary_join",
+    "adversary_remove",
+    "context_reset",
+    "probe_start",
+    "probe_end",
 )
 
 COMMUNICATIVE_TYPES = frozenset({"chat", "blueprint_edit", "strategy_note"})
